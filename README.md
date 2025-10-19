@@ -100,9 +100,3 @@ sudo systemctl start vps-monitor
 
 MIT License
 
-## Security Considerations
-
-- Keep your Discord webhook URL private
-- Regularly review excluded paths and IP ranges
-- Monitor the monitor's logs for any issues
-- Ensure proper file permissions on config files
