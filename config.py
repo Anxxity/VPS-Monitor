@@ -61,7 +61,7 @@ DUPLICATE_ALERT_THRESHOLD = 2
 # Network monitoring configuration
 # Skip connections from these hosts
 SKIP_HOSTS = [
-    ".contaboserver.net"  # Contabo VPS connections
+    ".example.net"  # Contabo VPS connections
 ]
 
 # Skip connections from these IP ranges
