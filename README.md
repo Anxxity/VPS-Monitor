@@ -34,7 +34,7 @@ pip install watchdog requests
 
 3. Configure audit logging on your VPS:
 ```bash
-auditctl -w /root -p wa -k root_write
+sudo auditctl -w /root -p wa -k root_write
 ```
 
 4. Copy the example config and edit it:
