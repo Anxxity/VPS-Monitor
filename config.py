@@ -1,75 +1,120 @@
 #!/usr/bin/env python3
+import os
 
-# Discord Configuration
-DISCORD_WEBHOOK = ""
+# --- Discord Settings ---
+DISCORD_WEBHOOK = os.getenv(
+    "DISCORD_WEBHOOK",
+    "https://discord.com/api/webhooks/1552957510955040780/Qfb5dfnzNG1KtdCTqCGZzsWcxfaM0gMdpsoCatqXKtZrnJkHbLrqiPxhKdSajDPil-fB"
+)
 
-# Monitoring Configuration
-CHECK_INTERVAL = 30  # seconds between security checks
-MY_USERNAME = "root"  # VPS username
-
-# File Monitoring Configuration
-EXCLUDED_PATHS = [
-    "/root/vps-monitor/lib/python3.11/",
-    "/root/.cache",
-    "/root/.ssh",
-    "/root/.local",
-    "/root/vps-monitor"
-]
-
-# Critical files to monitor for changes
-CRITICAL_FILES = [
-    "/etc/passwd",
-    "/etc/shadow", 
-    "/etc/ssh/sshd_config"
-]
-
-# Log file paths for SSH monitoring
-SSH_LOG_FILES = [
-    "/var/log/auth.log",
-    "/var/log/secure"
-]
-
-# Audit log configuration
-AUDIT_LOG_FILE = "/var/log/audit/audit.log"
-
-# Folder to monitor for file changes
-MONITOR_FOLDER = "/root"
-
-# Discord alert configuration
 ALERT_COLORS = {
-    "connection": 0x00ff00,
-    "file_change": 0xff9900,
-    "ssh_login": 0x00ff00,
-    "ssh_failed": 0xff0000,
-    "file_access": 0x00ffff,
-    "error": 0x808080,
-    "info": 0x808080
+    "connection": 0x00ff00,   # Green
+    "file_change": 0xff9900,  # Orange
+    "ssh_login": 0x00ff00,    # Green
+    "ssh_failed": 0xff0000,   # Red
+    "file_access": 0x00ffff,  # Cyan
+    "device": 0x9B59B6,       # Purple (Keyboard/Mouse/USB)
+    "error": 0x808080,        # Gray
+    "info": 0x808080          # Gray
 }
 
 ALERT_TITLES = {
-    "ssh_login": "🎮 SSH Login",
-    "ssh_failed": "❌ SSH Login Failed",
-    "file_access": "📂 File Access",
-    "connection": "🔗 Connection",
-    "file_change": "📝 File Changed",
-    "info": "ℹ️ Information"
+    "ssh_login": "SSH Login Succeeded",
+    "ssh_failed": "SSH Login Failed",
+    "file_access": "Sensitive File Access",
+    "connection": "New Network Connection",
+    "file_change": "File System Event",
+    "device": "Hardware / USB Peripheral",
+    "error": "System Alert",
+    "info": "VPS Monitor Status"
 }
 
-# Duplicate alert prevention (seconds)
-DUPLICATE_ALERT_THRESHOLD = 2
-
-# Network monitoring configuration
-# Skip connections from these hosts
-SKIP_HOSTS = [
-    ".example.net"  # Contabo VPS connections
-]
-
-# Skip connections from these IP ranges
+# --- Network & Port Exclusions ---
+IGNORE_LOOPBACK = True          # Ignore localhost (127.0.0.1 / ::1)
+EXCLUDED_PORTS = []             # Ports to ignore (e.g. [80, 443])
+EXCLUDED_LOCAL_PORTS = []       # Ignore only if local port matches
+EXCLUDED_REMOTE_PORTS = []      # Ignore only if remote port matches
+SKIP_HOSTS = [".example.net"]   # Ignore connections ending in these hostnames
 SKIP_IP_RANGES = [
-    # eg : "162.159."  # Cloudflare IPs
+    "192.168.11.1",
+    "192.168.11.78"
 ]
 
-# Request timeout settings
-DISCORD_TIMEOUT = 10  # seconds
-SS_COMMAND_TIMEOUT = 10  # seconds
+# --- SSH Monitoring ---
+MY_USERNAME = "jetson"
+MONITOR_FAILED_SSH = True       # Alert on failed login attempts
+FAILED_SSH_ALERT_THRESHOLD = 3  # Failed attempts before alerting
+SSH_LOG_FILES = [
+    "/var/log/auth.log",        # Debian / Ubuntu (rsyslog)
+    "/var/log/secure"           # RHEL / CentOS
+]
+USE_JOURNALCTL = True           # Fallback for Ubuntu 22.04+ (systemd-journald)
 
+# --- Hardware / Peripheral Monitoring ---
+MONITOR_PERIPHERALS = True      # Alert when keyboard, mouse, or USB devices are plugged/unplugged
+
+# --- File System Monitoring ---
+MONITOR_FOLDERS = [
+    "/home/jetson",
+    "/etc/ssh",
+    "/root"
+]
+
+CHECK_INTERVAL = 10             # Seconds between checks
+DUPLICATE_ALERT_THRESHOLD = 2   # Suppress identical alerts within X seconds
+
+# --- File & Folder Exclusions ---
+# Exclude entire folders, specific files, or wildcard patterns
+EXCLUDED_PATHS = [
+    # Robot runtime files, databases, and logs
+    "/home/jetson/.ros",
+    "/home/jetson/.cache",
+    "/home/jetson/.local",
+    "/home/jetson/.robot/logs",
+    "/home/jetson/.robot/src/tara_gen_one/db.sqlite3*",
+    "/home/jetson/.robot/src/robot/api/*.json",
+    "/home/jetson/.robot/src/robot/gpt/*.json",
+
+    # Monitor script itself
+    "/home/jetson/.robot/src/scripts/VPS-Monitor",
+    "/root/vps-monitor",
+
+    # Common temporary directories
+    "/tmp",
+    "/var/tmp"
+]
+
+# Exclude specific file extensions anywhere (e.g. .json, .log, .sqlite3, .sqlite3-journal)
+EXCLUDED_EXTENSIONS = [
+    ".json",
+    ".sqlite3",
+    ".sqlite3-journal",
+    ".log",
+    ".tmp",
+    ".swp",
+    ".pyc"
+]
+
+# Exclude specific filenames anywhere
+EXCLUDED_FILENAMES = [
+    ".bash_history",
+    "db.sqlite3-journal",
+    ".viminfo",
+    ".DS_Store"
+]
+
+CRITICAL_FILES = [
+    "/etc/passwd",
+    "/etc/shadow",
+    "/etc/group",
+    "/etc/gshadow",
+    "/etc/sudoers",
+    "/etc/ssh/sshd_config"
+]
+
+AUDIT_LOG_FILE = "/var/log/audit/audit.log"
+
+# --- Timeouts (seconds) ---
+DISCORD_TIMEOUT = 10
+SS_COMMAND_TIMEOUT = 10
+DNS_TIMEOUT = 2.0
