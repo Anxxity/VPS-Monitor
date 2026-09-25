@@ -27,6 +27,8 @@ cd vps-monitor
 
 2. Install required packages:
 ```bash
+sudo apt update
+sudo apt install auditd audispd-plugins
 pip install watchdog requests
 ```
 
